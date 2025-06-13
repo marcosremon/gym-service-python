@@ -1,0 +1,19 @@
+from typing import List
+from src.core.model.entities.user import User
+from src.application.dto.user_dto import UserDTO
+
+class UserMapper:
+    @staticmethod
+    def map_user_list(users: List[User]) -> List[UserDTO]:
+        return list(
+            map(lambda user: UserDTO(
+                dni=user.dni,
+                username=user.username,
+                surname=user.surname,
+                email=user.email,
+                friend_code=user.friend_code,
+                password="*********",
+                role=user.role,
+                inscription_date=user.inscription_date,
+            ), users)
+        )

@@ -1,0 +1,11 @@
+[importlinter]
+root_package = src
+
+[[contract]]
+name = Clean Architecture layers
+type = layers
+layers =
+    src.service
+    src.infrastructure
+    src.application
+    src.core
