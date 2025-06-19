@@ -1,4 +1,4 @@
-from src.transversal.utils.base import Base
+from src.transversal.common.base import Base
 from .user import User
 from .user_friend import UserFriend
 from .routine import Routine

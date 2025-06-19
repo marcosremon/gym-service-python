@@ -7,13 +7,26 @@ class UserMapper:
     def map_user_list(users: List[User]) -> List[UserDTO]:
         return list(
             map(lambda user: UserDTO(
-                dni=user.dni,
-                username=user.username,
-                surname=user.surname,
-                email=user.email,
-                friend_code=user.friend_code,
-                password="*********",
-                role=user.role,
-                inscription_date=user.inscription_date,
+                dni = user.dni,
+                username = user.username,
+                surname = user.surname,
+                email = user.email,
+                friend_code = user.friend_code,
+                password = "*********",
+                role = user.role,
+                inscription_date = str(user.inscription_date),
             ), users)
+        )
+
+    @staticmethod
+    def map_user(user: User) -> UserDTO:
+        return UserDTO(
+            dni = user.dni,
+            username = user.username,
+            surname = user.surname,
+            email = user.email,
+            friend_code = user.friend_code,
+            password="*********",
+            role = user.role,
+            inscription_date = str(user.inscription_date),
         )

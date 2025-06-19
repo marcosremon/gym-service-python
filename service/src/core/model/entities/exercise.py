@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, ForeignKey, Integer, String
-from src.transversal.utils.base import Base
+from src.transversal.common.base import Base
 
 class Exercise(Base):
     __tablename__ = "exercises"

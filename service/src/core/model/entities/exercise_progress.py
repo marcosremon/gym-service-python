@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Float, ForeignKey, Enum, DateTime
 from sqlalchemy.orm import relationship
 from src.core.model.enums.week_day import WeekDay
-from src.transversal.utils.base import Base
+from src.transversal.common.base import Base
 
 class ExerciseProgress(Base):
     __tablename__ = "exercise_progress"

@@ -1,7 +1,7 @@
 from sqlalchemy import BigInteger, Column, String, LargeBinary, Enum, DateTime
 from sqlalchemy.orm import relationship
 from src.core.model.enums.role import Role
-from src.transversal.utils.base import Base
+from src.transversal.common.base import Base
 
 class User(Base):
     __tablename__ = "users"

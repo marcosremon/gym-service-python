@@ -5,8 +5,9 @@ from pydantic import BaseModel
 class UserDTO(BaseModel):
     dni: str
     username: str
+    surname: str
     email: str
     friend_code: str
     password: str
-    role: Role
-    inscription_date: datetime
+    role: str
+    inscription_date: str

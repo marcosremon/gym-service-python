@@ -1,6 +1,6 @@
 from sqlalchemy import Column, BigInteger, ForeignKey
 from sqlalchemy.orm import relationship
-from src.transversal.utils.base import Base
+from src.transversal.common.base import Base
 
 class UserFriend(Base):
     __tablename__ = 'user_friends'

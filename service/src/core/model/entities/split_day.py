@@ -1,7 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Enum
 from src.core.model.enums.week_day import WeekDay
 from sqlalchemy.orm import relationship
-from src.transversal.utils.base import Base
+from src.transversal.common.base import Base
 
 class SplitDay(Base):
     __tablename__ = "split_days"
