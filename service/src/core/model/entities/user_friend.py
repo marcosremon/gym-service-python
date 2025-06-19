@@ -1,9 +1,8 @@
-from dataclasses import dataclass
 from sqlalchemy import Column, BigInteger, ForeignKey
 from sqlalchemy.orm import relationship
+from src.transversal.utils.base import Base
 
-@dataclass
-class UserFriend:
+class UserFriend(Base):
     __tablename__ = 'user_friends'
     
     user_friend_id: int = Column(BigInteger, primary_key=True, autoincrement=True)
