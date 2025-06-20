@@ -78,17 +78,14 @@ class PasswordUtils:
             return False
 
     @staticmethod
-    def create_password(length: int) -> str:
-        if length < 8:
-            raise ValueError("La longitud mínima debe ser 8 caracteres")
+    def create_password() -> str:
+        chars = string.ascii_letters + string.digits + "!@#$%^&*()_-+=<>?"
+        friend_code = ""
+        for _ in range(8):
+            index = random.randint(0, len(chars) - 1)
+            friend_code += chars[index]
 
-        chars = f"{string.ascii_lowercase}{string.ascii_uppercase}{string.digits}!@#$%^&*()_-+=<>?"
-        password = ""
-
-        for _ in range(length):
-            password += random.choice(chars)
-
-        return password
+        return friend_code
 
     @staticmethod
     def is_password_valid(password: str) -> bool:

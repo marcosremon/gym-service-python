@@ -8,7 +8,7 @@ from src.core.model.enums.week_day import WeekDay
 class GenericUtils:
     @staticmethod
     def rol_tostring(role: Role) -> str:
-        match (role):
+        match role:
             case Role.USER:
                 return 'USER'
             case Role.ADMIN:
@@ -38,12 +38,10 @@ class GenericUtils:
 
     @staticmethod
     def create_friend_code() -> str:
-        chars = string.ascii_letters + string.digits + "!@#$%^&*()_-+=<>?"
+        chars = string.ascii_letters + string.digits
         friend_code = ""
         for _ in range(8):
             index = random.randint(0, len(chars) - 1)
             friend_code += chars[index]
 
         return friend_code
-
-
