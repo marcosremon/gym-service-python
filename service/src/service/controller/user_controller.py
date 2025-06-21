@@ -1,22 +1,16 @@
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse
-
 from src.core.model.enums.role import Role
 from src.service.configuration.dependency_injection import get_user_application
 from src.transversal.request_response.user.create_admin.create_admin_request import CreateAdminRequest
 from src.transversal.request_response.user.create_admin.create_admin_response import CreateAdminResponse
 from src.transversal.request_response.user.create_generic_user.create_generic_user_request import CreateGenericUserRequest
 from src.transversal.request_response.user.create_google_user.create_google_user_request import CreateGoogleUserRequest
-from src.transversal.request_response.user.create_google_user.create_google_user_response import \
-    CreateGoogleUserResponse
-from src.transversal.request_response.user.create_new_password.create_new_password_request import \
-    CreateNewPasswordRequest
-from src.transversal.request_response.user.create_new_password.create_new_password_response import \
-    CreateNewPasswordResponse
-from src.transversal.request_response.user.create_new_password_with_email_and_password.create_new_password_with_email_and_password_request import \
-    CreateNewPasswordWithEmailAndPasswordRequest
-from src.transversal.request_response.user.create_new_password_with_email_and_password.create_new_password_with_email_and_password_response import \
-    CreateNewPasswordWithEmailAndPasswordResponse
+from src.transversal.request_response.user.create_google_user.create_google_user_response import CreateGoogleUserResponse
+from src.transversal.request_response.user.create_new_password.create_new_password_request import CreateNewPasswordRequest
+from src.transversal.request_response.user.create_new_password.create_new_password_response import CreateNewPasswordResponse
+from src.transversal.request_response.user.create_new_password_with_email_and_password.create_new_password_with_email_and_password_request import CreateNewPasswordWithEmailAndPasswordRequest
+from src.transversal.request_response.user.create_new_password_with_email_and_password.create_new_password_with_email_and_password_response import CreateNewPasswordWithEmailAndPasswordResponse
 from src.transversal.request_response.user.create_user.create_user_request import CreateUserRequest
 from src.transversal.request_response.user.create_user.create_user_response import CreateUserResponse
 from src.transversal.request_response.user.delete_user.delete_user_request import DeleteUserRequest
@@ -28,6 +22,42 @@ from src.transversal.request_response.user.update_user.update_user_request impor
 from src.transversal.request_response.user.update_user.update_user_response import UpdateUserResponse
 
 http = APIRouter(prefix="/api/user")
+
+@http.post("/create-user", response_model = CreateUserResponse)
+async def create_user(create_user_request: CreateUserRequest, application = Depends(get_user_application)):
+    try:
+        generic_user_request = CreateGenericUserRequest(
+            dni = create_user_request.dni,
+            username = create_user_request.username,
+            surname = create_user_request.surname,
+            email = create_user_request.email,
+            password = create_user_request.password,
+            confirm_password = create_user_request.confirm_password,
+            role = Role.USER
+        )
+
+        create_user_response = await application.create_user(generic_user_request)
+        if create_user_response.is_success:
+            return JSONResponse(
+                content = create_user_response.dict(),
+                status_code = create_user_response.response_codes_json
+            )
+
+        return JSONResponse(
+            content = create_user_response.dict(),
+            status_code = create_user_response.response_codes_json
+        )
+    except Exception as e:
+        error_response = CreateUserResponse(
+            is_success = False,
+            message = str(f"unexpected error in create-user controller -->: {e}"),
+            response_codes_json = 500,
+        )
+
+        return JSONResponse(
+            content = error_response.dict(),
+            status_code = error_response.response_codes_json
+        )
 
 @http.get("/get-users", response_model = GetUsersResponse)
 async def get_users(application = Depends(get_user_application)):
@@ -74,42 +104,6 @@ async def get_user_by_email(get_user_by_email_request:  GetUserByEmailRequest, a
         error_response = GetUserByEmailResponse(
             is_success = False,
             message = str(f"unexpected error in get-user-by-email controller -->: {e}"),
-            response_codes_json = 500,
-        )
-
-        return JSONResponse(
-            content = error_response.dict(),
-            status_code = error_response.response_codes_json
-        )
-
-@http.post("/create-user", response_model = CreateUserResponse)
-async def create_user(create_user_request: CreateUserRequest, application = Depends(get_user_application)):
-    try:
-        generic_user_request = CreateGenericUserRequest(
-            dni = create_user_request.dni,
-            username = create_user_request.username,
-            surname = create_user_request.surname,
-            email = create_user_request.email,
-            password = create_user_request.password,
-            confirm_password = create_user_request.confirm_password,
-            role = Role.USER
-        )
-
-        create_user_response = await application.create_user(generic_user_request)
-        if create_user_response.is_success:
-            return JSONResponse(
-                content = create_user_response.dict(),
-                status_code = create_user_response.response_codes_json
-            )
-
-        return JSONResponse(
-            content = create_user_response.dict(),
-            status_code = create_user_response.response_codes_json
-        )
-    except Exception as e:
-        error_response = CreateUserResponse(
-            is_success = False,
-            message = str(f"unexpected error in create-user controller -->: {e}"),
             response_codes_json = 500,
         )
 

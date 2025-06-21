@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from src.application.mappers.user_mapper import UserMapper
 from src.core.interfaces.repository.abstract_user_repository import AbstractUserRepository
 from src.core.model.entities import Routine, UserFriend
@@ -294,7 +293,7 @@ class UserRepository(AbstractUserRepository):
             password_hash = PasswordUtils.encrypt_password(new_password)
 
             user.password = password_hash
-            MailUtils.send_password_email(user.username, user.email)
+            MailUtils.send_password_email(user.username, user.email, new_password)
             await self._session.commit()
 
             return CreateNewPasswordResponse(
@@ -343,7 +342,7 @@ class UserRepository(AbstractUserRepository):
                 )
 
             user.password = PasswordUtils.encrypt_password(create_new_password_request.new_password)
-            MailUtils.send_password_email(user.username, user.email)
+            MailUtils.send_password_email(user.username, user.email, create_new_password_request.new_password)
             await self._session.commit()
 
             return CreateNewPasswordWithEmailAndPasswordResponse(

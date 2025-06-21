@@ -1,5 +1,7 @@
 from src.core.interfaces.application.abstract_user_application import AbstractUserApplication
 from src.infraestructure.persistence.user_repository import UserRepository
+from src.transversal.request_response.routine.create_routine.create_routine_request import CreateRoutineRequest
+from src.transversal.request_response.routine.create_routine.create_routine_response import CreateRoutineResponse
 from src.transversal.request_response.user.create_generic_user.create_generic_user_request import \
     CreateGenericUserRequest
 from src.transversal.request_response.user.create_google_user.create_google_user_request import CreateGoogleUserRequest

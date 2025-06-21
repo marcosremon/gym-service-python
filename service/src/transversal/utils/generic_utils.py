@@ -4,7 +4,6 @@ import random
 from src.core.model.enums.role import Role
 from src.core.model.enums.week_day import WeekDay
 
-
 class GenericUtils:
     @staticmethod
     def rol_tostring(role: Role) -> str:
@@ -45,3 +44,23 @@ class GenericUtils:
             friend_code += chars[index]
 
         return friend_code
+
+    @staticmethod
+    def change_week_day_language(week_day: str) -> str:
+        match week_day:
+            case "Lunes":
+                return "Monday"
+            case "Martes":
+                return "Tuesday"
+            case "Miércoles" | "Miercoles":
+                return "Wednesday"
+            case "Jueves":
+                return "Thursday"
+            case "Viernes":
+                return "Friday"
+            case "Sábado" | "Sabado":
+                return "Saturday"
+            case "Domingo":
+                return "Sunday"
+            case _:
+                raise ValueError(f"Día de la semana no válido: {week_day}")
