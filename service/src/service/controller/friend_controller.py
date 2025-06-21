@@ -15,7 +15,7 @@ from src.transversal.request_response.friend.get_all_user_friends.get_all_user_f
 from src.transversal.request_response.split_day.update_split_day.update_split_day_request import UpdateSplitDayRequest
 from src.transversal.request_response.split_day.update_split_day.update_split_day_response import UpdateSplitDayResponse
 
-http = APIRouter(prefix="/api/routine")
+http = APIRouter(prefix="/api/friend")
 
 @http.post("/get-all-user-friends", response_model = GetAllUserFriendsResponse)
 async def get_all_user_friends(get_all_user_friends_request: GetAllUserFriendsRequest, application = Depends(get_user_application)):

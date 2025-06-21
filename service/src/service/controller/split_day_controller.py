@@ -5,7 +5,7 @@ from src.service.configuration.dependency_injection import get_user_application
 from src.transversal.request_response.split_day.update_split_day.update_split_day_request import UpdateSplitDayRequest
 from src.transversal.request_response.split_day.update_split_day.update_split_day_response import UpdateSplitDayResponse
 
-http = APIRouter(prefix="/api/routine")
+http = APIRouter(prefix="/api/split-day")
 
 @http.post("/update-split-day", response_model = UpdateSplitDayResponse)
 async def update_split_day(update_split_day_request: UpdateSplitDayRequest, application = Depends(get_user_application)):
