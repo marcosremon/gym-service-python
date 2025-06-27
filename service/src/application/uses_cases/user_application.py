@@ -33,13 +33,6 @@ class UserApplication(AbstractUserApplication):
         return await self._repository.get_users()
 
     async def create_user(self, generic_user_request: CreateGenericUserRequest) -> CreateUserResponse:
-        if generic_user_request.email is None or generic_user_request.dni is None or generic_user_request.username is None:
-            return CreateUserResponse(
-                is_success = False,
-                message = "Username or email or dni is required",
-                response_codes_json = 400
-            )
-
         return await self._repository.create_user(generic_user_request)
 
     async def get_user_by_email(self, get_user_by_email: GetUserByEmailRequest) -> GetUserByEmailResponse:

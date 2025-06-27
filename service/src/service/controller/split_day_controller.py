@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse
 
-from src.service.configuration.dependency_injection import get_user_application
+from src.infraestructure.dependency.dependency_injection import get_user_application
 from src.transversal.request_response.split_day.update_split_day.update_split_day_request import UpdateSplitDayRequest
 from src.transversal.request_response.split_day.update_split_day.update_split_day_response import UpdateSplitDayResponse
 

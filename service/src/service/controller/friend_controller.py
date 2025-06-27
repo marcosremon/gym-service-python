@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse
 
-from src.service.configuration.dependency_injection import get_user_application
+from src.infraestructure.dependency.dependency_injection import get_user_application
 from src.transversal.request_response.friend.add_new_user_friend.add_new_user_friend_request import \
     AddNewUserFriendRequest
 from src.transversal.request_response.friend.add_new_user_friend.add_new_user_friend_response import \
@@ -12,8 +12,6 @@ from src.transversal.request_response.friend.get_all_user_friends.get_all_user_f
     GetAllUserFriendsRequest
 from src.transversal.request_response.friend.get_all_user_friends.get_all_user_friend_response import \
     GetAllUserFriendsResponse
-from src.transversal.request_response.split_day.update_split_day.update_split_day_request import UpdateSplitDayRequest
-from src.transversal.request_response.split_day.update_split_day.update_split_day_response import UpdateSplitDayResponse
 
 http = APIRouter(prefix="/api/friend")
 

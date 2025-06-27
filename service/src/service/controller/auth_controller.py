@@ -1,25 +1,13 @@
 from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse
 
-from src.service.configuration.dependency_injection import get_user_application
+from src.infraestructure.dependency.dependency_injection import get_user_application
 from src.transversal.request_response.auth.check_token_status.check_token_status_request import CheckTokenStatusRequest
 from src.transversal.request_response.auth.check_token_status.check_token_status_response import \
     CheckTokenStatusResponse
 from src.transversal.request_response.auth.login.login_request import LoginRequest
 from src.transversal.request_response.auth.login.login_response import LoginResponse
 from src.transversal.request_response.auth.login_web.login_web_response import LoginWebResponse
-from src.transversal.request_response.friend.add_new_user_friend.add_new_user_friend_request import \
-    AddNewUserFriendRequest
-from src.transversal.request_response.friend.add_new_user_friend.add_new_user_friend_response import \
-    AddNewUserFriendResponse
-from src.transversal.request_response.friend.delete_friend.delete_friend_request import DeleteFriendRequest
-from src.transversal.request_response.friend.delete_friend.delete_friend_response import DeleteFriendResponse
-from src.transversal.request_response.friend.get_all_user_friends.get_all_user_friend_request import \
-    GetAllUserFriendsRequest
-from src.transversal.request_response.friend.get_all_user_friends.get_all_user_friend_response import \
-    GetAllUserFriendsResponse
-from src.transversal.request_response.split_day.update_split_day.update_split_day_request import UpdateSplitDayRequest
-from src.transversal.request_response.split_day.update_split_day.update_split_day_response import UpdateSplitDayResponse
 
 http = APIRouter(prefix="/api/auth")
 

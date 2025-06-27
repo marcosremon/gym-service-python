@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse
 from src.core.model.enums.role import Role
-from src.service.configuration.dependency_injection import get_user_application
+from src.infraestructure.dependency.dependency_injection import get_user_application
+from src.transversal.common.response_codes_json import ResponseCodesJson
 from src.transversal.request_response.user.create_admin.create_admin_request import CreateAdminRequest
 from src.transversal.request_response.user.create_admin.create_admin_response import CreateAdminResponse
 from src.transversal.request_response.user.create_generic_user.create_generic_user_request import CreateGenericUserRequest
@@ -22,69 +23,94 @@ from src.transversal.request_response.user.update_user.update_user_request impor
 from src.transversal.request_response.user.update_user.update_user_response import UpdateUserResponse
 
 http = APIRouter(prefix="/api/user")
-
 @http.post("/create-user", response_model = CreateUserResponse)
 async def create_user(create_user_request: CreateUserRequest, application = Depends(get_user_application)):
-    try:
-        generic_user_request = CreateGenericUserRequest(
-            dni = create_user_request.dni,
-            username = create_user_request.username,
-            surname = create_user_request.surname,
-            email = create_user_request.email,
-            password = create_user_request.password,
-            confirm_password = create_user_request.confirm_password,
-            role = Role.USER
-        )
+    json_response = JSONResponse(
+        status_code = ResponseCodesJson.BAD_REQUEST,
+        content = CreateUserResponse(
+            response_codes_json = ResponseCodesJson.USER_NOT_CREATED,
+            is_success = False,
+            message = str("can not create user"),
+        ).dict()
+    )
 
-        create_user_response = await application.create_user(generic_user_request)
-        if create_user_response.is_success:
-            return JSONResponse(
-                content = create_user_response.dict(),
-                status_code = create_user_response.response_codes_json
+    try:
+        if (create_user_request.email is None
+                or create_user_request.dni is None
+                or create_user_request.username is None
+                or create_user_request.password is None
+                or create_user_request.confirm_password is None):
+            json_response = JSONResponse(
+                status_code = ResponseCodesJson.BAD_REQUEST,
+                content = CreateUserResponse(
+                    response_codes_json = ResponseCodesJson.BAD_REQUEST,
+                    is_success = False,
+                    message = str("invalid data, the inputs parameters are null or empty"),
+                ).dict()
+            )
+        else:
+            generic_user_request = CreateGenericUserRequest(
+                dni = create_user_request.dni,
+                username = create_user_request.username,
+                surname = create_user_request.surname,
+                email = create_user_request.email,
+                password = create_user_request.password,
+                confirm_password = create_user_request.confirm_password,
+                role = Role.USER
             )
 
-        return JSONResponse(
-            content = create_user_response.dict(),
-            status_code = create_user_response.response_codes_json
-        )
-    except Exception as e:
-        error_response = CreateUserResponse(
-            is_success = False,
-            message = str(f"unexpected error in create-user controller -->: {e}"),
-            response_codes_json = 500,
+            create_user_response = await application.create_user(generic_user_request)
+            if create_user_response.is_success:
+                json_response = JSONResponse(
+                    status_code = ResponseCodesJson.OK,
+                    content = CreateUserResponse(
+                        response_codes_json = ResponseCodesJson.OK,
+                        is_success = False,
+                        message = str("user created successfully"),
+                        user_dto = create_user_response.user_dto,
+                    ).dict()
+                )
+            else:
+                json_response = JSONResponse(
+                    status_code = ResponseCodesJson.BAD_REQUEST,
+                    content = CreateUserResponse(
+                        response_codes_json = ResponseCodesJson.USER_NOT_CREATED,
+                        is_success = False,
+                        message = str(f"user can not create: {create_user_response.message}"),
+                    ).dict()
+                )
+    except Exception as ex:
+        json_response = JSONResponse(
+            status_code = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+            content = CreateUserResponse(
+                response_codes_json = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+                is_success = False,
+                message = str(f"unexpected error on create_user controller: {ex}"),
+            ).dict()
         )
 
-        return JSONResponse(
-            content = error_response.dict(),
-            status_code = error_response.response_codes_json
-        )
+    return json_response
 
 @http.get("/get-users", response_model = GetUsersResponse)
 async def get_users(application = Depends(get_user_application)):
+    json_response = JSONResponse()
     try:
         get_users_response = await application.get_users()
         if get_users_response.is_success:
-            return JSONResponse(
-                content = get_users_response.dict(),
-                status_code = get_users_response.response_codes_json
-            )
-
-        return JSONResponse(
-            content = get_users_response.dict(),
-            status_code = get_users_response.response_codes_json
-        )
+            json_response.content = await get_users_response.dict()
+            json_response.status_code = get_users_response.response_codes_json
+        else:
+            json_response.content = await get_users_response.dict()
+            json_response.status_code = get_users_response.response_codes_json
     except Exception as e:
         error_response = GetUsersResponse(
                 is_success = False,
                 message = str(f"unexpected error in get-users controller -->: {e}"),
                 response_codes_json = 500,
-                users=[]
         ),
 
-        return JSONResponse(
-            content = error_response.dict(),
-            status_code=error_response.response_codes_json
-        )
+        json_response.content = error_response.dict()
+        json_response.status_code = error_response.response_codes_json
 
 @http.post("/get-user-by-email", response_model = GetUserByEmailResponse)
 async def get_user_by_email(get_user_by_email_request:  GetUserByEmailRequest, application = Depends(get_user_application)):

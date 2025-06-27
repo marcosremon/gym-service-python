@@ -1,7 +1,7 @@
+from typing import Optional
 from pydantic import BaseModel
 
-
 class BaseResponse(BaseModel):
-    message: str
-    is_success: bool
-    response_codes_json: int
+    message: Optional[str] = None
+    is_success: Optional[bool] = None
+    response_codes_json: Optional[int] = None

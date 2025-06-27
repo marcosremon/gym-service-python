@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse
 
-from src.service.configuration.dependency_injection import get_user_application
+from src.infraestructure.dependency.dependency_injection import get_user_application
 from src.transversal.request_response.routine.create_routine.create_routine_request import CreateRoutineRequest
 from src.transversal.request_response.routine.create_routine.create_routine_response import CreateRoutineResponse
 from src.transversal.request_response.routine.delete_routine.delete_routine_request import DeleteRoutineRequest

@@ -1,6 +1,5 @@
 from sqlalchemy import BigInteger, Column, String, LargeBinary, Enum, DateTime
 from sqlalchemy.orm import relationship
-from src.core.model.enums.role import Role
 from src.transversal.common.base import Base
 
 class User(Base):
@@ -13,7 +12,7 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     friend_code = Column(String, unique=True, nullable=False)
     password = Column(LargeBinary, nullable=False)
-    role = Column(Enum(Role), nullable=False)
+    role = Column(String, nullable=False)
     inscription_date = Column(DateTime, nullable=False)
 
     routines = relationship(

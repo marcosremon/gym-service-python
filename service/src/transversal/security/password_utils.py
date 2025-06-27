@@ -1,28 +1,32 @@
 import os
 import string
-from random import random
-from sqlalchemy import LargeBinary
+import random
+import json
+import base64
+from typing import Optional, Union
+
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-import base64
-import json
-from typing import Optional, Union
 
 class PasswordUtils:
     _SECRET_KEY: Optional[bytes] = None
     _SALT: Optional[bytes] = None
-    _CONFIG_LOADED = False
+    _CONFIG_LOADED: bool = False
+    _PASSWORD_LENGTH: int = 12
+    _FRIEND_CODE_LENGTH: int = 8
 
     @classmethod
-    def load_config(cls, config_path: str = None):
+    def load_config(cls, config_path: Optional[str] = None) -> None:
         try:
             if not config_path:
                 base_dir = os.path.dirname(os.path.abspath(__file__))
-                config_path = os.path.join(base_dir, '..', '..', 'service', 'configuration', 'appsettings.json')
+                config_path = os.path.join(
+                    base_dir, '..', '..', 'service', 'configuration', 'appsettings.json'
+                )
                 config_path = os.path.abspath(config_path)
 
-            with open(config_path, 'r') as f:
+            with open(config_path, 'r', encoding='utf-8') as f:
                 config = json.load(f)
 
             encryption_settings = config.get('encryption_settings', {})
@@ -30,15 +34,19 @@ class PasswordUtils:
             cls._SALT = encryption_settings.get('salt', '').encode()
 
             if not cls._SECRET_KEY or not cls._SALT:
-                raise ValueError("Configuración de encriptación incompleta en el archivo JSON")
+                raise ValueError("Configuración de encriptación incompleta")
 
             cls._CONFIG_LOADED = True
 
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"Error decodificando JSON: {str(e)}") from e
+        except FileNotFoundError as e:
+            raise RuntimeError(f"Archivo de configuración no encontrado: {str(e)}") from e
         except Exception as e:
-            raise RuntimeError(f"Error cargando configuración: {str(e)}")
+            raise RuntimeError(f"Error cargando configuración: {str(e)}") from e
 
     @classmethod
-    def _get_cipher(cls):
+    def _get_cipher(cls) -> Fernet:
         if not cls._CONFIG_LOADED:
             cls.load_config()
 
@@ -55,37 +63,47 @@ class PasswordUtils:
         return Fernet(key)
 
     @staticmethod
-    def encrypt_password(password: str) -> LargeBinary:
+    def encrypt_password(password: str) -> bytes:
+        if not password:
+            raise ValueError("La contraseña no puede estar vacía")
         cipher = PasswordUtils._get_cipher()
-        encrypted_password = cipher.encrypt(password.encode())
-        return encrypted_password
+        return cipher.encrypt(password.encode())
 
     @staticmethod
-    def decrypt_password(encrypted_password: LargeBinary) -> str:
+    def decrypt_password(encrypted_password: bytes) -> str:
         cipher = PasswordUtils._get_cipher()
-        decrypted_password = cipher.decrypt(encrypted_password)
-        return decrypted_password.decode()
+        return cipher.decrypt(encrypted_password).decode()
 
     @staticmethod
     def is_password_encrypted(password: Union[str, bytes]) -> bool:
-        if isinstance(password, bytes):
-            password = password.decode('utf-8')
+        if isinstance(password, str):
+            try:
+                password = password.encode('utf-8')
+            except UnicodeEncodeError:
+                return False
 
         try:
-            decoded_bytes = base64.b64decode(password)
-            return len(decoded_bytes) % 16 == 0
-        except (base64.binascii.Error, ValueError):
+            decoded = base64.urlsafe_b64decode(password)
+            return len(decoded) > 0
+        except (ValueError, Exception):
             return False
 
-    @staticmethod
-    def create_password() -> str:
-        chars = string.ascii_letters + string.digits + "!@#$%^&*()_-+=<>?"
-        friend_code = ""
-        for _ in range(8):
-            index = random.randint(0, len(chars) - 1)
-            friend_code += chars[index]
+    @classmethod
+    def generate_friend_code(cls) -> str:
+        chars = string.ascii_uppercase + string.digits
+        return ''.join(random.SystemRandom().choice(chars) for _ in range(cls._FRIEND_CODE_LENGTH))
 
-        return friend_code
+    @classmethod
+    def generate_secure_password(cls) -> str:
+        chars = (
+            string.ascii_letters +
+            string.digits +
+            "!@#$%^&*()_-+=<>?"
+        )
+        while True:
+            password = ''.join(random.SystemRandom().choice(chars) for _ in range(cls._PASSWORD_LENGTH))
+            if cls.is_password_valid(password):
+                return password
 
     @staticmethod
     def is_password_valid(password: str) -> bool:
@@ -97,4 +115,4 @@ class PasswordUtils:
         has_digit = any(c.isdigit() for c in password)
         has_special = any(not c.isalnum() and not c.isspace() for c in password)
 
-        return has_lower and has_upper and has_digit and has_special
+        return all([has_lower, has_upper, has_digit, has_special])

@@ -1,6 +1,8 @@
 from typing import List
 from src.core.model.entities.user import User
 from src.application.dto.user_dto import UserDTO
+from src.transversal.utils.generic_utils import GenericUtils
+
 
 class UserMapper:
     @staticmethod
