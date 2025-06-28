@@ -23,12 +23,12 @@ class UserMapper:
     @staticmethod
     def map_user(user: User) -> UserDTO:
         return UserDTO(
-            dni = user.dni,
-            username = user.username,
-            surname = user.surname,
-            email = user.email,
-            friend_code = user.friend_code,
+            dni=user.dni,
+            username=user.username,
+            surname=user.surname,
+            email=user.email,
+            friend_code=user.friend_code,
             password="*********",
-            role = user.role,
-            inscription_date = str(user.inscription_date),
+            role=user.role,
+            inscription_date=str(user.inscription_date) if user.inscription_date else None,
         )

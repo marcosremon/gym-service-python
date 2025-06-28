@@ -94,7 +94,7 @@ class PasswordUtils:
         return ''.join(random.SystemRandom().choice(chars) for _ in range(cls._FRIEND_CODE_LENGTH))
 
     @classmethod
-    def generate_secure_password(cls) -> str:
+    def generate_password(cls) -> str:
         chars = (
             string.ascii_letters +
             string.digits +
