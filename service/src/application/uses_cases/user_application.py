@@ -36,61 +36,19 @@ class UserApplication(AbstractUserApplication):
         return await self._repository.create_user(generic_user_request)
 
     async def get_user_by_email(self, get_user_by_email: GetUserByEmailRequest) -> GetUserByEmailResponse:
-        if get_user_by_email.email is None:
-            return GetUserByEmailResponse(
-                is_success = False,
-                message = "email is required",
-                response_codes_json = 400
-            )
-
         return await self._repository.get_user_by_email(get_user_by_email)
 
     async def delete_user(self, delete_user_request: DeleteUserRequest) -> DeleteUserResponse:
-        if delete_user_request.email is None:
-            return DeleteUserResponse(
-                is_success = False,
-                message = "email is required",
-                response_codes_json = 400
-            )
-
         return await self._repository.delete_user(delete_user_request)
 
     async def update_user(self, update_user_request: UpdateUserRequest) -> UpdateUserResponse:
-        if update_user_request.email is None:
-            return UpdateUserResponse(
-                is_success = False,
-                message = "email is required",
-                response_codes_json = 400
-            )
-
         return await self._repository.update_user(update_user_request)
 
     async def create_google_user(self, create_google_user_request: CreateGoogleUserRequest) -> CreateGoogleUserResponse:
-        if create_google_user_request.email is None:
-            return CreateGoogleUserResponse(
-                is_success = False,
-                message = "email is required",
-                response_codes_json = 400
-            )
-
         return await self._repository.create_google_user(create_google_user_request)
 
     async def create_new_password(self, create_new_password_request: CreateNewPasswordRequest) -> CreateNewPasswordResponse:
-        if create_new_password_request.email is None:
-            return CreateNewPasswordResponse(
-                is_success = False,
-                message = "email is required",
-                response_codes_json = 400
-            )
-
         return await self._repository.create_new_password(create_new_password_request)
 
     async def create_new_password_with_email_and_password(self, create_new_password_request: CreateNewPasswordWithEmailAndPasswordRequest) -> CreateNewPasswordWithEmailAndPasswordResponse:
-        if create_new_password_request.email is None:
-            return CreateNewPasswordWithEmailAndPasswordResponse(
-                is_success = False,
-                message = "email is required",
-                response_codes_json = 400
-            )
-
         return await self._repository.create_new_password_with_email_and_password(create_new_password_request)

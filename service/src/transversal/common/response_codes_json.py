@@ -19,5 +19,3 @@ class ResponseCodesJson:
     BAD_GATEWAY = 502
     SERVICE_UNAVAILABLE = 503
     GATEWAY_TIMEOUT = 504
-
-    USER_NOT_CREATED = 999

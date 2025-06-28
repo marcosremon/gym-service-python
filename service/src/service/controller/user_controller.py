@@ -23,17 +23,89 @@ from src.transversal.request_response.user.update_user.update_user_request impor
 from src.transversal.request_response.user.update_user.update_user_response import UpdateUserResponse
 
 http = APIRouter(prefix="/api/user")
+
+@http.get("/get-users", response_model = GetUsersResponse)
+async def get_users(application = Depends(get_user_application)):
+    try:
+        get_users_response = await application.get_users()
+        if get_users_response.is_success:
+            json_response = JSONResponse(
+                status_code = get_users_response.response_codes_json,
+                content = GetUsersResponse(
+                    response_codes_json = get_users_response.response_codes_json,
+                    is_success = get_users_response.is_success,
+                    message = get_users_response.message,
+                    users = get_users_response.users,
+                )
+            )
+        else:
+            json_response = JSONResponse(
+                status_code = get_users_response.response_codes_json,
+                content = GetUsersResponse(
+                    response_codes_json = get_users_response.response_codes_json,
+                    is_success = get_users_response.is_success,
+                    message = get_users_response.message,
+                    users = get_users_response.users,
+                )
+            )
+    except Exception as e:
+        json_response = JSONResponse(
+            status_code = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+            content = GetUsersResponse(
+                response_codes_json = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+                is_success = False,
+                message = str(f"unexpected error on get_users controller: {e}"),
+            )
+        )
+
+    return json_response
+
+@http.post("/get-user-by-email", response_model = GetUserByEmailResponse)
+async def get_user_by_email(get_user_by_email_request:  GetUserByEmailRequest, application = Depends(get_user_application)):
+    try:
+        if get_user_by_email.email is None:
+            json_response = JSONResponse(
+                status_code = ResponseCodesJson.BAD_REQUEST,
+                content = GetUserByEmailResponse(
+                    response_codes_json = ResponseCodesJson.BAD_REQUEST,
+                    is_success = False,
+                    message = str("invalid data, the inputs parameters are null or empty"),
+                )
+            )
+        else:
+            get_user_by_email_response = await application.get_user_by_email(get_user_by_email_request)
+            if get_user_by_email_response.is_success:
+                json_response = JSONResponse(
+                    status_code = get_user_by_email_response.response_codes_json,
+                    content = GetUserByEmailResponse(
+                        response_codes_json = get_user_by_email_response.response_codes_json,
+                        is_success = get_user_by_email_response.is_success,
+                        message = get_user_by_email_response.message,
+                    )
+                )
+            else:
+                json_response = JSONResponse(
+                    status_code = get_user_by_email_response.response_codes_json,
+                    content = GetUserByEmailResponse(
+                        response_codes_json = get_user_by_email_response.response_codes_json,
+                        is_success = get_user_by_email_response.is_success,
+                        message = get_user_by_email_response.message,
+                    )
+                )
+    except Exception as e:
+        json_response = JSONResponse(
+            status_code = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+            content = GetUserByEmailResponse(
+                response_codes_json = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+                is_success = False,
+                message = str(f"unexpected error on get_user_by_email controller: {e}"),
+            )
+        )
+
+    return json_response
+
 @http.post("/create-user", response_model = CreateUserResponse)
 async def create_user(create_user_request: CreateUserRequest, application = Depends(get_user_application)):
-    json_response = JSONResponse(
-        status_code = ResponseCodesJson.BAD_REQUEST,
-        content = CreateUserResponse(
-            response_codes_json = ResponseCodesJson.USER_NOT_CREATED,
-            is_success = False,
-            message = str("can not create user"),
-        ).dict()
-    )
-
     try:
         if (create_user_request.email is None
                 or create_user_request.dni is None
@@ -45,7 +117,7 @@ async def create_user(create_user_request: CreateUserRequest, application = Depe
                 content = CreateUserResponse(
                     response_codes_json = ResponseCodesJson.BAD_REQUEST,
                     is_success = False,
-                    message = str("invalid data, the inputs parameters are null or empty"),
+                    message = str(f"invalid data, the inputs parameters are null or empty"),
                 ).dict()
             )
         else:
@@ -62,21 +134,21 @@ async def create_user(create_user_request: CreateUserRequest, application = Depe
             create_user_response = await application.create_user(generic_user_request)
             if create_user_response.is_success:
                 json_response = JSONResponse(
-                    status_code = ResponseCodesJson.OK,
+                    status_code = create_user_response.response_codes_json,
                     content = CreateUserResponse(
-                        response_codes_json = ResponseCodesJson.OK,
-                        is_success = False,
-                        message = str("user created successfully"),
+                        response_codes_json = create_user_response.response_codes_json,
+                        is_success = create_user_response.is_success,
+                        message = create_user_response.message,
                         user_dto = create_user_response.user_dto,
                     ).dict()
                 )
             else:
                 json_response = JSONResponse(
-                    status_code = ResponseCodesJson.BAD_REQUEST,
+                    status_code = create_user_response.response_codes_json,
                     content = CreateUserResponse(
-                        response_codes_json = ResponseCodesJson.USER_NOT_CREATED,
-                        is_success = False,
-                        message = str(f"user can not create: {create_user_response.message}"),
+                        response_codes_json = create_user_response.response_codes_json,
+                        is_success = create_user_response.is_success,
+                        message = create_user_response.message,
                     ).dict()
                 )
     except Exception as ex:
@@ -91,225 +163,291 @@ async def create_user(create_user_request: CreateUserRequest, application = Depe
 
     return json_response
 
-@http.get("/get-users", response_model = GetUsersResponse)
-async def get_users(application = Depends(get_user_application)):
-    json_response = JSONResponse()
-    try:
-        get_users_response = await application.get_users()
-        if get_users_response.is_success:
-            json_response.content = await get_users_response.dict()
-            json_response.status_code = get_users_response.response_codes_json
-        else:
-            json_response.content = await get_users_response.dict()
-            json_response.status_code = get_users_response.response_codes_json
-    except Exception as e:
-        error_response = GetUsersResponse(
-                is_success = False,
-                message = str(f"unexpected error in get-users controller -->: {e}"),
-                response_codes_json = 500,
-        ),
-
-        json_response.content = error_response.dict()
-        json_response.status_code = error_response.response_codes_json
-
-@http.post("/get-user-by-email", response_model = GetUserByEmailResponse)
-async def get_user_by_email(get_user_by_email_request:  GetUserByEmailRequest, application = Depends(get_user_application)):
-    try:
-        get_user_by_email_response = await application.get_user_by_email(get_user_by_email_request)
-        if get_user_by_email_response.is_success:
-            return JSONResponse(
-                content = get_user_by_email_response.dict(),
-                status_code = get_user_by_email_response.response_codes_json
-            )
-
-        return JSONResponse(
-            content = get_user_by_email_response.dict(),
-            status_code = get_user_by_email_response.response_codes_json
-        )
-    except Exception as e:
-        error_response = GetUserByEmailResponse(
-            is_success = False,
-            message = str(f"unexpected error in get-user-by-email controller -->: {e}"),
-            response_codes_json = 500,
-        )
-
-        return JSONResponse(
-            content = error_response.dict(),
-            status_code = error_response.response_codes_json
-        )
-
 @http.post("/create-google-user", response_model = CreateGoogleUserResponse)
-async def create_user(create_google_user_request: CreateGoogleUserRequest, application = Depends(get_user_application)):
+async def create_google_user(create_google_user_request: CreateGoogleUserRequest, application = Depends(get_user_application)):
     try:
-        generic_google_user_request = CreateGenericUserRequest(
-            dni = create_google_user_request.dni,
-            username = create_google_user_request.username,
-            surname = create_google_user_request.surname,
-            email = create_google_user_request.email,
-            password = create_google_user_request.email,
-            confirm_password = create_google_user_request.confirm_password,
-            role = Role.USER
-        )
-
-        create_google_user_response = await application.create_google_user(generic_google_user_request)
-        if create_google_user_response.is_success:
-            return JSONResponse(
-                content = create_google_user_response.dict(),
-                status_code = create_google_user_response.response_codes_json
+        if create_google_user_request.email is None:
+            json_response = JSONResponse(
+                status_code = ResponseCodesJson.BAD_REQUEST,
+                content = CreateGoogleUserResponse(
+                    response_codes_json=ResponseCodesJson.BAD_REQUEST,
+                    is_success = False,
+                    message = str(f"invalid data, the inputs parameters are null or empty"),
+                )
+            )
+        else:
+            generic_google_user_request = CreateGenericUserRequest(
+                dni = create_google_user_request.dni,
+                username = create_google_user_request.username,
+                surname = create_google_user_request.surname,
+                email = create_google_user_request.email,
+                password = create_google_user_request.email,
+                confirm_password = create_google_user_request.confirm_password,
+                role = Role.USER
             )
 
-        return JSONResponse(
-            content = create_google_user_response.dict(),
-            status_code = create_google_user_response.response_codes_json
-        )
+            create_google_user_response = await application.create_google_user(generic_google_user_request)
+            if create_google_user_response.is_success:
+                json_response = JSONResponse(
+                    status_code = create_google_user_response.response_codes_json,
+                    content = CreateGoogleUserResponse(
+                        response_codes_json = create_google_user_response.response_codes_json,
+                        is_success = create_google_user_response.is_success,
+                        message = create_google_user_response.message,
+                    )
+                )
+            else:
+                json_response = JSONResponse(
+                    status_code = create_google_user_response.response_codes_json,
+                    content = CreateGoogleUserResponse(
+                        response_codes_json = create_google_user_response.response_codes_json,
+                        is_success = create_google_user_response.is_success,
+                        message = create_google_user_response.message,
+                    )
+                )
     except Exception as e:
-        error_response = CreateGoogleUserResponse(
-            is_success = False,
-            message = str(f"unexpected error in create-google-user controller -->: {e}"),
-            response_codes_json = 500,
+        json_response = JSONResponse(
+            status_code = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+            content = CreateGoogleUserResponse(
+                response_codes_json = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+                is_success = False,
+                message = str(f"unexpected error on create_google_user controller: {e}"),
+            )
         )
 
-        return JSONResponse(
-            content = error_response.dict(),
-            status_code = error_response.response_codes_json
-        )
+    return json_response
 
 @http.post("/create-admin", response_model = CreateAdminResponse)
-async def create_user(create_admin_request: CreateAdminRequest, application = Depends(get_user_application)):
+async def create_admin(create_admin_request: CreateAdminRequest, application = Depends(get_user_application)):
     try:
-        generic_admin_request = CreateGenericUserRequest(
-            dni = create_admin_request.dni,
-            username = create_admin_request.username,
-            surname = create_admin_request.surname,
-            email = create_admin_request.email,
-            password = create_admin_request.password,
-            confirm_password = create_admin_request.confirm_password,
-            role = Role.ADMIN
-        )
-
-        create_admin_response = await application.create_user(generic_admin_request)
-        if create_admin_response.is_success:
-            return JSONResponse(
-                content = create_admin_response.dict(),
-                status_code = create_admin_response.response_codes_json
+        if (create_admin_request.email is None
+                or create_admin_request.dni is None
+                or create_admin_request.username is None
+                or create_admin_request.password is None
+                or create_admin_request.confirm_password is None):
+            json_response = JSONResponse(
+                status_code = ResponseCodesJson.BAD_REQUEST,
+                content = CreateAdminResponse(
+                    response_codes_json = ResponseCodesJson.BAD_REQUEST,
+                    is_success = False,
+                    message = str(f"invalid data, the inputs parameters are null or empty"),
+                ).dict()
+            )
+        else:
+            generic_admin_request = CreateGenericUserRequest(
+                dni = create_admin_request.dni,
+                username = create_admin_request.username,
+                surname = create_admin_request.surname,
+                email = create_admin_request.email,
+                password = create_admin_request.password,
+                confirm_password = create_admin_request.confirm_password,
+                role = Role.ADMIN
             )
 
-        return JSONResponse(
-            content = create_admin_response.dict(),
-            status_code = create_admin_response.response_codes_json
-        )
+            create_admin_response = await application.create_user(generic_admin_request)
+            if create_admin_response.is_success:
+                json_response = JSONResponse(
+                    status_code = create_admin_response.response_codes_json,
+                    content = CreateAdminResponse(
+                        response_codes_json = create_admin_response.response_codes_json,
+                        is_success = create_admin_response.is_success,
+                        message = create_admin_response.message,
+                    ).dict()
+                )
+            else:
+                json_response = JSONResponse(
+                    status_code = create_admin_response.response_codes_json,
+                    content = CreateAdminResponse(
+                        response_codes_json = create_admin_response.response_codes_json,
+                        is_success = create_admin_response.is_success,
+                        message = create_admin_response.message,
+                    ).dict()
+                )
     except Exception as e:
-        error_response = CreateAdminResponse(
-            is_success = False,
-            message = str(f"unexpected error in create-admin controller -->: {e}"),
-            response_codes_json = 500,
+        json_response = JSONResponse(
+            status_code = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+            content = CreateAdminResponse(
+                response_codes_json = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+                is_success = False,
+                message = str(f"unexpected error on create_admin_user controller: {e}"),
+            ).dict()
         )
 
-        return JSONResponse(
-            content = error_response.dict(),
-            status_code = error_response.response_codes_json
-        )
+    return json_response
 
 @http.post("/update-user", response_model = UpdateUserResponse)
 async def update_user(update_user_request: UpdateUserRequest, application = Depends(get_user_application)):
     try:
-        update_user_response = await application.update_user(update_user_request)
-        if update_user_response.is_success:
-            return JSONResponse(
-                content = update_user_response.dict(),
-                status_code = update_user_response.response_codes_json
+        if update_user_request.email is None:
+            json_response = JSONResponse(
+                status_code = ResponseCodesJson.BAD_REQUEST,
+                content = UpdateUserResponse(
+                    response_codes_json = ResponseCodesJson.BAD_REQUEST,
+                    is_success = False,
+                    message = str(f"invalid data, the inputs parameters are null or empty"),
+                )
             )
-
-        return JSONResponse(
-            content = update_user_response.dict(),
-            status_code = update_user_response.response_codes_json
-        )
+        else:
+            update_user_response = await application.update_user(update_user_request)
+            if update_user_response.is_success:
+                json_response = JSONResponse(
+                    status_code = update_user_response.response_codes_json,
+                    content = UpdateUserResponse(
+                        response_codes_json = update_user_response.response_codes_json,
+                        is_success = update_user_response.is_success,
+                        message = update_user_response.message,
+                    )
+                )
+            else:
+                json_response = JSONResponse(
+                    status_code = update_user_response.response_codes_json,
+                    content = UpdateUserResponse(
+                        response_codes_json = update_user_response.response_codes_json,
+                        is_success = update_user_response.is_success,
+                        message = update_user_response.message,
+                    )
+                )
     except Exception as e:
-        error_response = UpdateUserResponse(
-            is_success = False,
-            message = str(f"unexpected error in update-user controller -->: {e}"),
-            response_codes_json = 500,
+        json_response = JSONResponse(
+            status_code = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+            content = UpdateUserResponse(
+                response_codes_json = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+                is_success = False,
+                message = str(f"unexpected error on update_user controller: {e}"),
+            )
         )
 
-        return JSONResponse(
-            content = error_response.dict(),
-            status_code = error_response.response_codes_json
-        )
+    return json_response
 
 @http.post("/delete-user", response_model = DeleteUserResponse)
 async def delete_user(delete_user_request: DeleteUserRequest, application = Depends(get_user_application)):
     try:
-        delete_user_response = await application.delete_user(delete_user_request)
-        if delete_user_response.is_success:
-            return JSONResponse(
-                content = delete_user_response.dict(),
-                status_code = delete_user_response.response_codes_json
+        if delete_user_request.email is None:
+            json_response = JSONResponse(
+                status_code = ResponseCodesJson.BAD_REQUEST,
+                content = DeleteUserResponse(
+                    response_codes_json = ResponseCodesJson.BAD_REQUEST,
+                    is_success = False,
+                    message = str(f"invalid data, the inputs parameters are null or empty"),
+                )
             )
-
-        return JSONResponse(
-            content = delete_user_response.dict(),
-            status_code = delete_user_response.response_codes_json
-        )
+        else:
+            delete_user_response = await application.delete_user(delete_user_request)
+            if delete_user_response.is_success:
+                json_response = JSONResponse(
+                    status_code = delete_user_response.response_codes_json,
+                    content = DeleteUserResponse(
+                        response_codes_json = delete_user_response.response_codes_json,
+                        is_success = delete_user_response.is_success,
+                        message = delete_user_response.message,
+                    )
+                )
+            else:
+                json_response = JSONResponse(
+                    status_code = delete_user_response.response_codes_json,
+                    content=DeleteUserResponse(
+                        response_codes_json = delete_user_response.response_codes_json,
+                        is_success = delete_user_response.is_success,
+                        message = delete_user_response.message,
+                    )
+                )
     except Exception as e:
-        error_response = DeleteUserResponse(
-            is_success = False,
-            message = str(f"unexpected error in delete-user controller -->: {e}"),
-            response_codes_json = 500,
+        json_response = JSONResponse(
+            status_code = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+            content = DeleteUserResponse(
+                response_codes_json = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+                is_success = False,
+                message = str(f"unexpected error on delete_user controller: {e}"),
+            )
         )
 
-        return JSONResponse(
-            content = error_response.dict(),
-            status_code = error_response.response_codes_json
-        )
+    return json_response
 
 @http.post("/create-new-password", response_model = CreateNewPasswordResponse)
 async def create_new_password(create_new_password_request: CreateNewPasswordRequest, application = Depends(get_user_application)):
     try:
-        create_new_password_response = await application.create_new_password(create_new_password_request)
-        if create_new_password_response.is_success:
-            return JSONResponse(
-                content = create_new_password_response.dict(),
-                status_code = create_new_password_response.response_codes_json
+        if create_new_password_request.email is None:
+            json_response = JSONResponse(
+                status_code = ResponseCodesJson.BAD_REQUEST,
+                content = CreateNewPasswordResponse(
+                    response_codes_json = ResponseCodesJson.BAD_REQUEST,
+                    is_success = False,
+                    message = str(f"invalid data, the inputs parameters are null or empty"),
+                )
             )
-
-        return JSONResponse(
-            content = create_new_password_response.dict(),
-            status_code = create_new_password_response.response_codes_json
-        )
+        else:
+            create_new_password_response = await application.create_new_password(create_new_password_request)
+            if create_new_password_response.is_success:
+                json_response = JSONResponse(
+                    status_code = create_new_password_response.response_codes_json,
+                    content = CreateNewPasswordResponse(
+                        response_codes_json = create_new_password_response.response_codes_json,
+                        is_success = create_new_password_response.is_success,
+                        message = create_new_password_response.message,
+                    )
+                )
+            else:
+                json_response = JSONResponse(
+                    status_code = create_new_password_response.response_codes_json,
+                    content = CreateNewPasswordResponse(
+                        response_codes_json = create_new_password_response.response_codes_json,
+                        is_success = create_new_password_response.is_success,
+                        message = create_new_password_response.message,
+                    )
+                )
     except Exception as e:
-        error_response = CreateNewPasswordResponse(
-            is_success = False,
-            message = f"unexpected error in create-new-password controller -->: {e}",
-            response_codes_json = 500,
+        json_response = JSONResponse(
+            status_code = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+            content = CreateNewPasswordResponse(
+                response_codes_json = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+                is_success = False,
+                message = str(f"unexpected error on create_new_password controller: {e}"),
+            )
         )
 
-        return JSONResponse(
-            content = error_response.dict(),
-            status_code = error_response.response_codes_json
-        )
+    return json_response
 
 @http.post("/create-new-password-with-email-and-password", response_model = CreateNewPasswordWithEmailAndPasswordResponse)
 async def create_new_password(create_new_password_request: CreateNewPasswordWithEmailAndPasswordRequest, application = Depends(get_user_application)):
     try:
-        create_new_password_response = await application.create_new_password_with_email_and_password(create_new_password_request)
-        if create_new_password_response.is_success:
-            return JSONResponse(
-                content = create_new_password_response.dict(),
-                status_code = create_new_password_response.response_codes_json
+        if create_new_password_request.email is None:
+            json_response = JSONResponse(
+                status_code = ResponseCodesJson.BAD_REQUEST,
+                content = CreateNewPasswordWithEmailAndPasswordResponse(
+                    response_codes_json = ResponseCodesJson.BAD_REQUEST,
+                    is_success = False,
+                    message = str(f"invalid data, the inputs parameters are null or empty"),
+                )
             )
-
-        return JSONResponse(
-            content = create_new_password_response.dict(),
-            status_code = create_new_password_response.response_codes_json
-        )
+        else:
+            create_new_password_response = await application.create_new_password_with_email_and_password(
+                create_new_password_request)
+            if create_new_password_response.is_success:
+                json_response = JSONResponse(
+                    status_code = create_new_password_response.response_codes_json,
+                    content = CreateNewPasswordWithEmailAndPasswordResponse(
+                        response_codes_json = create_new_password_response.response_codes_json,
+                        is_success = create_new_password_response.is_success,
+                        message = create_new_password_response.message,
+                    )
+                )
+            else:
+                json_response = JSONResponse(
+                    status_code = create_new_password_response.response_codes_json,
+                    content = CreateNewPasswordWithEmailAndPasswordResponse(
+                        response_codes_json = create_new_password_response.response_codes_json,
+                        is_success = create_new_password_response.is_success,
+                        message = create_new_password_response.message,
+                    )
+                )
     except Exception as e:
-        error_response = CreateNewPasswordResponse(
-            is_success = False,
-            message = f"unexpected error in create-new-password-with-email-and-password controller -->: {e}",
-            response_codes_json = 500,
+        json_response = JSONResponse(
+            status_code = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+            content = CreateNewPasswordWithEmailAndPasswordResponse(
+                response_codes_json = ResponseCodesJson.INTERNAL_SERVER_ERROR,
+                is_success = False,
+                message = str(f"unexpected error on create_new_password controller: {e}"),
+            )
         )
 
-        return JSONResponse(
-            content = error_response.dict(),
-            status_code = error_response.response_codes_json
-        )
+    return json_response
