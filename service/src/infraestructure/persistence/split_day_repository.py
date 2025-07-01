@@ -9,7 +9,6 @@ from src.transversal.request_response.split_day.update_split_day.update_split_da
 from src.transversal.request_response.split_day.update_split_day.update_split_day_response import UpdateSplitDayResponse
 from src.transversal.utils.generic_utils import GenericUtils
 
-
 class SplitDayRepository(AbstractSplitDayRepository):
     def __init__(self, session):
         self._session = session
